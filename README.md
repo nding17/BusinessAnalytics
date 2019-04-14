@@ -1,4 +1,4 @@
-# BusinessAnalytics
+# LearningAnalytics
 Group members:
 Fulei Zhang, Yahan Hu, Shipei Feng, Wenshan Liang, Naili Ding
 
