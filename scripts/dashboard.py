@@ -1,7 +1,6 @@
 from PyQt5.QtWidgets import QDialog
-from PyQt5.QtWidgets import QListWidget
-from PyQt5.QtWidgets import QCheckBox
 from PyQt5.QtWidgets import QVBoxLayout
+from PyQt5.QtWidgets import QGridLayout
 from PyQt5.QtWidgets import QTabWidget
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtWidgets import QLabel
@@ -104,6 +103,7 @@ class AnalyticsTab(QWidget):
         layout.addWidget(self.moduleBox)
         layout.addWidget(self.button)
         self.setLayout(layout)
+        
     
     def select_module(self, i):
         self.module_idx = i
@@ -167,21 +167,38 @@ class AnalyticsTab(QWidget):
 class TrackerTab(QWidget):
     def __init__(self):
         super().__init__()
-
-
-        label = QLabel("Terms And Conditions")
-        listWidget = QListWidget()
-        list = []
-
-        for i in range(1,20):
-            list.append("This Is Terms And Condition")
-
-        listWidget.insertItems(0, list)
-        checkBox = QCheckBox("Check The Terms And Conditions")
-
-
-        layout = QVBoxLayout()
-        layout.addWidget(label)
-        layout.addWidget(listWidget)
-        layout.addWidget(checkBox)
-        self.setLayout(layout)
+        self.initUI()
+        
+    def initUI(self):
+        self.studentID = QLabel("Student ID:          ")
+        self.studentID_input = QLineEdit()
+        self.module = QLabel("Course Module:          ")
+        
+        self.module_idx = 0
+        
+        course_modules = ['AAA','BBB','CCC','DDD','EEE','FFF','GGG']
+        self.moduleBox = QComboBox()
+        for module in course_modules:
+            self.moduleBox.addItem(f'Course Module - {module}')
+        self.moduleBox.currentIndexChanged.connect(self.select_module)
+        
+        self.button = QPushButton('Predict')
+        self.button.clicked.connect(self.predict)    
+    
+        ftablayout = QGridLayout()
+        ftablayout.setSpacing(10)
+        
+        ftablayout.addWidget(self.studentID, 1,0)
+        ftablayout.addWidget(self.studentID_input,1,1)
+        ftablayout.addWidget(self.module,2,0)
+        ftablayout.addWidget(self.moduleBox,2,1)
+        ftablayout.addWidget(self.button,3,0)
+ 
+        self.setLayout(ftablayout)
+        
+    
+    def select_module(self, i):
+        self.module_idx = i
+        
+    def predict(self):
+        pass
