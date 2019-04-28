@@ -73,6 +73,9 @@ class PerformanceTab(QWidget):
         # this is the Navigation widget
         # it takes the Canvas widget and a parent
         self.toolbar = NavigationToolbar(self.canvas, self)
+        
+        self.module_idx = 0
+        self.tracker_idx = 0
 
         self.comboBox = QComboBox()
         self.comboBox.addItem('Registration Tracking Board')
@@ -101,10 +104,10 @@ class PerformanceTab(QWidget):
         self.setLayout(layout)
     
     def select_module(self, i):
-        pass
+        self.module_idx = i
     
     def select_tracker(self, i):
-        pass
+        self.tracker_idx = i
     
     def regi_hist(self,course):
         df_student_regi = pd.read_csv("../../data/studentRegistration.csv")
@@ -150,16 +153,10 @@ class PerformanceTab(QWidget):
 
     def plot(self):
         self.figure.clear()
-        # create an axis
-        #ax = self.figure.add_subplot(111)
-        # discards the old graph
-        #ax.hold(False) # deprecated, see above
-        # plot data
-        #ax.plot(data, '*-')
-        self.grade_boxplot('BBB')
-        #self.progress_plot('BBB')
-        #self.regi_hist('AAA')
-        # refresh canvas
+        plots = [self.regi_hist, self.progress_plot, self.grade_boxplot]
+        course_modules = ['AAA','BBB','CCC','DDD','EEE','FFF','GGG']
+        
+        plots[self.tracker_idx](course_modules[self.module_idx])
         self.canvas.draw()
 
                 
