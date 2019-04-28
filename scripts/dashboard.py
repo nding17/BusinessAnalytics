@@ -12,6 +12,7 @@ from PyQt5.QtWidgets import QComboBox
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.pyplot as plt
+import seaborn as sns
 import pandas as pd
 
 class LearnerTabs(QDialog):
@@ -21,16 +22,16 @@ class LearnerTabs(QDialog):
         self.setWindowTitle("Learning Analytics Dashboard")
 
         tabwidget = QTabWidget()
-        tabwidget.addTab(ProgressTab(), "Progress")
-        tabwidget.addTab(PerformanceTab(), "Performance")
-        tabwidget.addTab(BehaviorTab(), "Behavior")
+        tabwidget.addTab(SupportTab(), "Support")
+        tabwidget.addTab(AnalyticsTab(), "Analytics")
+        tabwidget.addTab(TrackerTab(), "Tracking")
 
         vboxLayout = QVBoxLayout()
         vboxLayout.addWidget(tabwidget)
 
         self.setLayout(vboxLayout)
 
-class ProgressTab(QWidget):
+class SupportTab(QWidget):
      def __init__(self):
          super().__init__()
  
@@ -59,9 +60,9 @@ class ProgressTab(QWidget):
          self.setLayout(ftablayout)
     
 
-class PerformanceTab(QWidget):
+class AnalyticsTab(QWidget):
     def __init__(self, parent=None):
-        super(PerformanceTab, self).__init__(parent)
+        super(AnalyticsTab, self).__init__(parent)
 
         # a figure instance to plot on
         self.figure = plt.figure()
@@ -69,6 +70,7 @@ class PerformanceTab(QWidget):
         # this is the Canvas Widget that displays the `figure`
         # it takes the `figure` instance as a parameter to __init__
         self.canvas = FigureCanvas(self.figure)
+        self.adjustSize()
 
         # this is the Navigation widget
         # it takes the Canvas widget and a parent
@@ -146,10 +148,12 @@ class PerformanceTab(QWidget):
         df_assess_merged = pd.merge(df_stu_assess, df_assess[['code_module', 'id_assessment']], 
                             on='id_assessment', how='left')
         df_course = df_assess_merged[df_assess_merged['code_module']==course]
-        ax = df_course.boxplot(by='id_assessment', column=['score'], grid=False)
+        
+        ax = sns.boxplot(x="id_assessment", y="score", data=df_course)
         ax.set_xlabel('course ID')
         ax.set_ylabel('score')
         ax.set_title(f'Course Module - {course}')
+
 
     def plot(self):
         self.figure.clear()
@@ -160,8 +164,7 @@ class PerformanceTab(QWidget):
         self.canvas.draw()
 
                 
-
-class BehaviorTab(QWidget):
+class TrackerTab(QWidget):
     def __init__(self):
         super().__init__()
 
