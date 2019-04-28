@@ -12,6 +12,7 @@ from PyQt5.QtWidgets import QComboBox
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.pyplot as plt
+import pandas as pd
 
 class LearnerTabs(QDialog):
     def __init__(self):
@@ -106,12 +107,45 @@ class PerformanceTab(QWidget):
         pass
     
     def regi_hist(self,course):
-        import pandas as pd
-        df_student_regi = pd.read_csv("../data/studentRegistration.csv")
+        df_student_regi = pd.read_csv("../../data/studentRegistration.csv")
         group = df_student_regi.groupby(['code_module']).get_group(course)
         ax = group['date_registration'].hist(cumulative=True, histtype='bar')
         ax.set_xlabel('registration date (relative to day 0)')
         ax.set_ylabel('learners (cumulative)')
+        ax.set_title(f'Course Module - {course}')
+        
+    def progress_plot(self,course):
+        df_stu_assess = pd.read_csv('../../data/studentAssessment.csv')
+        df_assess = pd.read_csv('../../data/assessments.csv')
+        df_assess_merged = pd.merge(df_stu_assess, df_assess[['code_module', 'id_assessment']], 
+                            on='id_assessment', how='left')
+        
+        ids = df_assess_merged[df_assess_merged['code_module'] == course]['id_assessment'].unique()        
+        total = len(ids)
+        progress = []
+        
+        students = df_assess_merged['id_student'].unique()
+        df_module = df_assess_merged[df_assess_merged['code_module']==course]
+        for s in students:
+            prog = df_module[df_module['id_student']==s]['id_assessment'].unique().shape[0]
+            for i in range(prog):
+                progress.append(i/total)
+        
+        progress.sort(reverse=False)
+        ax = pd.Series(progress).hist(cumulative=False, histtype='bar', bins=5)
+        ax.set_xlabel('course progress in proportion')
+        ax.set_ylabel('number of learners')
+        ax.set_title(f'Course Module - {course}')
+    
+    def grade_boxplot(self,course):
+        df_stu_assess = pd.read_csv('../../data/studentAssessment.csv')
+        df_assess = pd.read_csv('../../data/assessments.csv')
+        df_assess_merged = pd.merge(df_stu_assess, df_assess[['code_module', 'id_assessment']], 
+                            on='id_assessment', how='left')
+        df_course = df_assess_merged[df_assess_merged['code_module']==course]
+        ax = df_course.boxplot(by='id_assessment', column=['score'], grid=False)
+        ax.set_xlabel('course ID')
+        ax.set_ylabel('score')
         ax.set_title(f'Course Module - {course}')
 
     def plot(self):
@@ -122,7 +156,9 @@ class PerformanceTab(QWidget):
         #ax.hold(False) # deprecated, see above
         # plot data
         #ax.plot(data, '*-')
-        self.regi_hist('AAA')
+        self.grade_boxplot('BBB')
+        #self.progress_plot('BBB')
+        #self.regi_hist('AAA')
         # refresh canvas
         self.canvas.draw()
 
