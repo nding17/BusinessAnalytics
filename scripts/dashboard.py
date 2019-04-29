@@ -7,6 +7,8 @@ from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QPushButton
 from PyQt5.QtWidgets import QComboBox
+from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QTableWidget
 from PyQt5 import QtGui
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -174,11 +176,14 @@ class TrackerTab(QWidget):
         self.studentID = QLabel("Student ID:          ")
         self.studentID_input = QLineEdit()
         self.module = QLabel("Course Module:          ")
+                
+        self.fileButton = QPushButton('Load File + Predict')
+        self.fileButton.clicked.connect(self.choosefile)
         
-        self.module_idx = 0
+        self.moduleBox = QComboBox()
         
         course_modules = ['AAA','BBB','CCC','DDD','EEE','FFF','GGG']
-        self.moduleBox = QComboBox()
+
         for module in course_modules:
             self.moduleBox.addItem(f'Course Module - {module}')
         self.moduleBox.currentIndexChanged.connect(self.select_module)
@@ -187,7 +192,10 @@ class TrackerTab(QWidget):
         self.button.clicked.connect(self.predict)    
         
         self.result = QLabel()
-    
+        
+        self.module_idx = 0
+        self.data_file = ""
+        
         ftablayout = QGridLayout()
         ftablayout.setSpacing(10)
         
@@ -196,17 +204,69 @@ class TrackerTab(QWidget):
         ftablayout.addWidget(self.module,2,0)
         ftablayout.addWidget(self.moduleBox,2,1)
         ftablayout.addWidget(self.button,3,0)
-        ftablayout.addWidget(self.result,3,1)
+        ftablayout.addWidget(self.fileButton, 3,1)
+        ftablayout.addWidget(self.result,4,1)
 
- 
         self.setLayout(ftablayout)
+        
+    def openFileNameDialog(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        fileName, _ = QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", "",
+                                                  "All Files (*);;Data Files (*.csv)", 
+                                                  options=options)
+        if fileName:
+            self.data_file = fileName
         
     
     def select_module(self, i):
         self.module_idx = i
         
+    
+    def choosefile(self):
+        self.openFileNameDialog()
+    
     def predict(self):
-        text = 'Based on our predication\nThe probability that\nthis student will complete the course is 0'
-        self.result.setText(text)
-        newfont = QtGui.QFont("Serif", 20, QtGui.QFont.Bold)
-        self.result.setFont(newfont)
+        studentId = self.studentID_input.text()
+        data = pd.read_csv('../../data/visual_set.csv')
+        try:
+            id_int = int(studentId)
+            X = data[data['id_student']==id_int]
+            course_modules = ['AAA','BBB','CCC','DDD','EEE','FFF','GGG']
+            course = course_modules[self.module_idx]
+            X = X[X['code_module']==course]
+            text = f"""
+            The probability that student {id_int}
+            will pass course module {course} is 
+            {X['pass_prob'].tolist()[0]}
+            
+            Following are his features:
+                gender : {X['gender'].tolist()[0]} 
+                highest_education : {X['highest_education'].tolist()[0]}
+                imd_band : {X['imd_band'].tolist()[0]}
+                age_band : {X['age_band'].tolist()[0]}
+                num_of_prev_attempts : {X['num_of_prev_attempts'].tolist()[0]}
+                studied_credits : {X['studied_credits'].tolist()[0]}
+                disability : {X['disability'].tolist()[0]}
+                Early Bird : {X['Early Bird'].tolist()[0]}
+                Last Minute : {X['Last Minite'].tolist()[0]}
+                Late Reg : {X['Late Reg'].tolist()[0]}
+                Regular Reg : {X['Regular Reg'].tolist()[0]}
+                sum_click : {X['sum_click'].tolist()[0]}
+                Regular Reg : {X['Regular Reg'].tolist()[0]}
+                sum_click : {X['sum_click'].tolist()[0]}
+                learning_pattern_0 : {X['learning_pattern_0'].tolist()[0]}
+                learning_pattern_1 : {X['learning_pattern_1'].tolist()[0]}
+                learning_pattern_2 : {X['learning_pattern_2'].tolist()[0]}
+                avg_ahead_ddl : {X['avg_ahead_ddl'].tolist()[0]}
+                std_assess_score : {X['std_assess_score'].tolist()[0]}
+            """
+        
+            self.result.setText(text)
+            newfont = QtGui.QFont("Serif", 15, QtGui.QFont.Bold)
+            self.result.setFont(newfont)
+        except:
+            text = 'Based on our predication\nThe probability that\nthis student will complete the course is 0'
+            self.result.setText(text)
+            newfont = QtGui.QFont("Serif", 20, QtGui.QFont.Bold)
+            self.result.setFont(newfont)
