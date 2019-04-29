@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QPushButton
 from PyQt5.QtWidgets import QComboBox
+from PyQt5 import QtGui
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
@@ -137,7 +138,7 @@ class AnalyticsTab(QWidget):
                 progress.append(i/total)
         
         progress.sort(reverse=False)
-        ax = pd.Series(progress).hist(cumulative=False, histtype='bar', bins=5)
+        ax = pd.Series(progress).hist(cumulative=False, histtype='bar', bins=6)
         ax.set_xlabel('course progress in proportion')
         ax.set_ylabel('number of learners')
         ax.set_title(f'Course Module - {course}')
@@ -184,6 +185,8 @@ class TrackerTab(QWidget):
         
         self.button = QPushButton('Predict')
         self.button.clicked.connect(self.predict)    
+        
+        self.result = QLabel()
     
         ftablayout = QGridLayout()
         ftablayout.setSpacing(10)
@@ -193,6 +196,8 @@ class TrackerTab(QWidget):
         ftablayout.addWidget(self.module,2,0)
         ftablayout.addWidget(self.moduleBox,2,1)
         ftablayout.addWidget(self.button,3,0)
+        ftablayout.addWidget(self.result,3,1)
+
  
         self.setLayout(ftablayout)
         
@@ -201,4 +206,7 @@ class TrackerTab(QWidget):
         self.module_idx = i
         
     def predict(self):
-        pass
+        text = 'Based on our predication\nThe probability that\nthis student will complete the course is 0'
+        self.result.setText(text)
+        newfont = QtGui.QFont("Serif", 20, QtGui.QFont.Bold)
+        self.result.setFont(newfont)
